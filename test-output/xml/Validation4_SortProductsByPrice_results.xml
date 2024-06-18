@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="AutomationProjectX"
+           tests="1"
+           failures="0"
+           errors="0"
+           skipped="0"
+           time="1.217">
+    <properties></properties>
+
+
+
+            <testcase
+                name="validation4_SortProductsByPrice"
+                time="1.217"
+                classname="Validation4_SortProductsByPrice">
+            </testcase>
+</testsuite>
