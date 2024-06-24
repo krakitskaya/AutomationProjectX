@@ -16,6 +16,5 @@ public class Validation2_ProblemUser extends BaseTest {
                 .addToCart()
                 .navigateToCart()
                 .verifyItemAdded(itemToAdd);
-
     }
 }

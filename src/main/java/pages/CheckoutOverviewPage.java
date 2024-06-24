@@ -1,20 +1,17 @@
 package pages;
 
-import org.openqa.selenium.By;
+import entity.ProductItem;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 import org.testng.Assert;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class CheckoutOverviewPage extends BaseWebPage {
 
-    private static List<WebElement> checkoutItems;
-    private static List<WebElement> checkoutPrices;
     @FindBy(xpath = "//*[contains(@class, 'summary_subtotal_label')]")
     WebElement itemsTotal;
     @FindBy(id = "finish")
@@ -22,35 +19,29 @@ public class CheckoutOverviewPage extends BaseWebPage {
 
     public CheckoutOverviewPage(WebDriver driver) {
         super(driver);
-        checkoutItems = driver.findElements(By.xpath("//*[contains(@class, 'inventory_item_name')]"));
-        checkoutPrices = driver.findElements(By.xpath("//*[contains(@class, 'inventory_item_price')]"));
         PageFactory.initElements(driver, this);
     }
 
-    public CheckoutOverviewPage verifyTheListOfItemsCorrect(HashSet<String> expectedItems) {
-        logger.info("Verify list of items is similar to: {}", expectedItems);
-        Assert.assertEquals(expectedItems, getTextSet(checkoutItems), "Verify the list of items on Checkout Overview is correct");
+    public CheckoutOverviewPage verifyTheListOfItemsCorrect(List<ProductItem> expectedItems) {
+        logger.info("Verify list of items is similar to: {}", expectedItems.stream().map(ProductItem::getName).collect(Collectors.toList()));
+        List<ProductItem> actualItems = getItemsFromPage();
+        boolean isSame;
+        if (actualItems.size() != expectedItems.size()) {
+            isSame = false;
+        }
+        {
+            isSame = expectedItems.containsAll(actualItems);
+        }
+        Assert.assertTrue(isSame, "Verify the list of items on Checkout Overview is correct");
         return this;
     }
 
     public CheckoutOverviewPage verifyItemTotal() {
         logger.info("Verify item total is correct");
         double totalActual = Double.parseDouble(itemsTotal.getText().replace("Item total: $", ""));
-        double totalExpected = countTotalExpectedFromThePage();
+        double totalExpected = getItemsFromPage().stream().mapToDouble(ProductItem::getPrice).sum();
         Assert.assertEquals(totalActual, totalExpected, "Verify total amount is correct");
         return this;
-    }
-
-    private static HashSet<String> getTextSet(List<WebElement> elements) {
-        return elements.stream().map(WebElement::getText).collect(Collectors.toCollection(HashSet::new));
-    }
-
-    private static double countTotalExpectedFromThePage() {
-        List<String> checkoutPricesTexts = checkoutPrices.stream()
-                .map(WebElement::getText)
-                .map(el -> el.replace("$", ""))
-                .collect(Collectors.toList());
-        return checkoutPricesTexts.stream().mapToDouble(Double::parseDouble).sum();
     }
 
     public void finishOrderAndVerifySuccessMessage() {

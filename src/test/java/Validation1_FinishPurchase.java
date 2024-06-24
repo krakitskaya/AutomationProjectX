@@ -1,11 +1,9 @@
+import entity.ProductItem;
 import enums.Users;
-import org.openqa.selenium.WebElement;
 import org.testng.annotations.Test;
 import pages.YourCartPage;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class Validation1_FinishPurchase extends BaseTest {
 
@@ -14,18 +12,16 @@ public class Validation1_FinishPurchase extends BaseTest {
 
         logger.info(String.format("login with username %s and password %s", Users.STANDARD_USER.getUsername(), password));
 
-        List<WebElement> addedItems = getLoginPage()
+        List<ProductItem> addedItems = getLoginPage()
                 .login(Users.STANDARD_USER.getUsername(), password)
                 .addAllItemsToCart()
                 .navigateToCart()
-                .removeThirdItemFromTheCart();
-
-        //TODO: getItemsFromCart - get Item Objects
-        HashSet<String> expectedItems = addedItems.stream().map(WebElement::getText).collect(Collectors.toCollection(HashSet::new));
+                .removeThirdItemFromTheCart()
+                .getItemsFromPage();
 
         new YourCartPage(driver).navigateToCheckout()
                 .fillCheckoutForm()
-                .verifyTheListOfItemsCorrect(expectedItems)
+                .verifyTheListOfItemsCorrect(addedItems)
                 .verifyItemTotal()
                 .finishOrderAndVerifySuccessMessage();
     }
